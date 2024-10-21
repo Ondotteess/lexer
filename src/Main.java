@@ -1,3 +1,4 @@
+import syspro.tm.Tasks;
 import syspro.tm.lexer.*;
 
 import java.util.*;
@@ -62,9 +63,12 @@ public class Main {
 
         @Override
         public List<Token> lex(String s) {
+
+            System.out.println(s);
             ArrayList<Token> a = new ArrayList<>();
 
             StringBuilder sb = new StringBuilder();
+            Head head = new Head(s);
 
             /*
              *   Встретили пробел -> добавляем все пробелы и табуляции прямо в токен
@@ -96,17 +100,17 @@ public class Main {
 
     public static void main(String[] args) {
         Lexer MyLexer = new MyLexer();
-        //Tasks.Lexer.registerSolution(MyLexer);
+        Tasks.Lexer.registerSolution(MyLexer);
 
-        ArrayList<Token> result = new ArrayList<>();
-
-        result = (ArrayList<Token>) MyLexer.lex("+ddf\t\t\t\t    -gfh      fdg    одав=#kjlfg sdgk;l");
-
-        for (var token: result) {
-
-                System.out.println(token);
-            }
-        System.out.println("lol");
+        //ArrayList<Token> result = new ArrayList<>();
+//
+        //result = (ArrayList<Token>) MyLexer.lex("+ddf\t\t\t\t    -gfh      fdg    одав=#kjlfg sdgk;l");
+//
+        //for (var token: result) {
+//
+        //        System.out.println(token);
+        //    }
+        //System.out.println("lol");
     }
 
 }
