@@ -1,50 +1,116 @@
 import syspro.tm.lexer.Token;
-
 import java.util.ArrayList;
 
 public class Head {
 
-    private final StringBuilder buffer;
     private final String s;
     private int startToken;
     private int endToken;
-    private boolean trivial;
-    private boolean token;
     private boolean endOfFile;
+
     public Head(String s) {
         this.s = s;
-        this.buffer = new StringBuilder();
         this.startToken = 0;
         this.endToken = 0;
-        this.trivial = false;
-        this.token = false;
         this.endOfFile = false;
     }
 
     private int getCode() {
-        return 0;
+        if (endToken < s.length()) {
+            return s.codePointAt(endToken);
+        }
+        return -1;
     }
 
-    private int peekCode() {
-        return 0;
-    }
-
-    private String read(){
-        
-
-        return null;
-    }
-
-    public ArrayList<Token> readToken(){
-        ArrayList<Token> result = new ArrayList<>();
-
-        while (endOfFile != false) {
-
-
+    private void readComment(StringBuilder buff) {
+        while (getCode() != '\n' && getCode() != -1) {
+            int codePoint = getCode();
+            buff.appendCodePoint(codePoint);
+            endToken += Character.charCount(codePoint);
         }
 
-        return result;
+        // Если это конец строки, добавляем перенос строки
+        if (getCode() == '\n') {
+            int codePoint = getCode();
+            buff.appendCodePoint(codePoint);
+            endToken += Character.charCount(codePoint);
+        }
+
+        // После прочтения комментария продолжаем искать другие тривии
+        if ( getCode() == '#') {
+            readComment(buff);  // Читаем следующий комментарий
+        }
     }
 
+    private String readTrivial() {
+        StringBuilder trivialBuffer = new StringBuilder();
+        int codePoint = getCode();
+
+        while (codePoint == ' ' || codePoint == '\t' || codePoint == '\n' || codePoint == '#') {
+            if (codePoint == '#') {
+                readComment(trivialBuffer);  // Читаем комментарий как тривию
+            } else {
+                trivialBuffer.appendCodePoint(codePoint);  // Читаем обычные тривии (пробелы, переносы)
+                endToken += Character.charCount(codePoint);
+            }
+            codePoint = getCode();  // Читаем следующий символ
+        }
+        return trivialBuffer.toString();
+    }
+
+    private String readToken() {
+        StringBuilder tokenBuffer = new StringBuilder();
+        int codePoint = getCode();
+
+        while (codePoint != ' ' && codePoint != '\t' && codePoint != '\n' && codePoint != '#' && codePoint != -1) {
+            tokenBuffer.appendCodePoint(codePoint);
+            endToken += Character.charCount(codePoint);
+            codePoint = getCode();
+        }
+        return tokenBuffer.toString();
+    }
+
+    private TokenInfo read() {
+        int startTrivial = endToken;
+        String initialTrivial = readTrivial();
+
+        int startToken = endToken;
+        String token = readToken();
+
+        String trailingTrivial = readTrivial();
+
+        if (token.isEmpty() && initialTrivial.isEmpty()) {
+            endOfFile = true;
+            return null;
+        }
+
+        int leadingTriviaLength = initialTrivial.length();
+        int trailingTriviaLength = trailingTrivial.length();
+
+        String fullValue = initialTrivial + token + trailingTrivial;
+
+        if (!initialTrivial.isEmpty()) {
+            return new TokenInfo(fullValue, startTrivial, endToken, leadingTriviaLength, trailingTriviaLength);
+        } else {
+            return new TokenInfo(fullValue, startToken, endToken, leadingTriviaLength, trailingTriviaLength);
+        }
+    }
+
+
+
+    public ArrayList<TokenInfo> getToken() {
+        ArrayList<TokenInfo> result = new ArrayList<>();
+
+        while (!endOfFile) {
+            TokenInfo tokenInfo = read();  // Читаем токен и тривию
+
+            if (tokenInfo != null) {
+                System.out.println(tokenInfo);  // Печать токена для отладки
+                result.add(tokenInfo);  // Добавляем объект TokenInfo в результат
+            }
+        }
+
+        return result;  // Возвращаем список TokenInfo
+    }
 
 }
