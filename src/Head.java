@@ -30,16 +30,14 @@ public class Head {
             endToken += Character.charCount(codePoint);
         }
 
-        // Если это конец строки, добавляем перенос строки
         if (getCode() == '\n') {
             int codePoint = getCode();
             buff.appendCodePoint(codePoint);
             endToken += Character.charCount(codePoint);
         }
 
-        // После прочтения комментария продолжаем искать другие тривии
         if (getCode() == '#') {
-            readComment(buff);  // Читаем следующий комментарий
+            readComment(buff);
         }
     }
 
@@ -59,15 +57,56 @@ public class Head {
         return trivialBuffer.toString();
     }
 
-    private String readToken() {
+    private String readString() {
+        StringBuilder stringBuffer = new StringBuilder();
+        int codePoint = getCode();
+
+        // Ensure we start with a quote
+        if (codePoint == '"') {
+            stringBuffer.appendCodePoint(codePoint);
+            endToken += Character.charCount(codePoint);
+            codePoint = getCode();
+
+            // Loop through the characters in the string
+            while (codePoint != '"' && codePoint != -1) {
+                if (codePoint == '\\') {  // Handle escape sequences
+                    stringBuffer.appendCodePoint(codePoint);  // Append the backslash
+                    endToken += Character.charCount(codePoint);
+                    codePoint = getCode();  // Next character after backslash
+                    if (codePoint != -1) {
+                        stringBuffer.appendCodePoint(codePoint);  // Append the escaped character
+                        endToken += Character.charCount(codePoint);
+                    }
+                } else {
+                    stringBuffer.appendCodePoint(codePoint);  // Regular string character
+                    endToken += Character.charCount(codePoint);
+                }
+                codePoint = getCode();
+            }
+
+            if (codePoint == '"') {  // Closing quote
+                stringBuffer.appendCodePoint(codePoint);
+                endToken += Character.charCount(codePoint);
+            }
+        }
+        return stringBuffer.toString();
+    }
+
+    private String readTokenSequence() {
         StringBuilder tokenBuffer = new StringBuilder();
         int codePoint = getCode();
 
-        while (codePoint != ' ' && codePoint != '\t' && codePoint != '\n' && codePoint != '#' && codePoint != -1) {
+        // If the token starts with a quote, read it as a string
+        if (codePoint == '"') {
+            return readString();
+        }
+
+        while (codePoint != ' ' && codePoint != '\t' && codePoint != '\n' && codePoint != '#' && codePoint != -1 && codePoint != '"') {
             tokenBuffer.appendCodePoint(codePoint);
             endToken += Character.charCount(codePoint);
             codePoint = getCode();
         }
+
         return tokenBuffer.toString();
     }
 
@@ -76,11 +115,11 @@ public class Head {
         String initialTrivial = readTrivial();
 
         int startToken = endToken;
-        String token = readToken();
+        String tokenSequence = readTokenSequence();
 
         String trailingTrivial = readTrivial();
 
-        if (token.isEmpty() && initialTrivial.isEmpty()) {
+        if (tokenSequence.isEmpty() && initialTrivial.isEmpty()) {
             endOfFile = true;
             return null;
         }
@@ -88,7 +127,7 @@ public class Head {
         int leadingTriviaLength = initialTrivial.length();
         int trailingTriviaLength = trailingTrivial.length();
 
-        String fullValue = initialTrivial + token + trailingTrivial;
+        String fullValue = initialTrivial + tokenSequence + trailingTrivial;
 
         if (!initialTrivial.isEmpty()) {
             return new SequenceInfo(fullValue, startTrivial, endToken, leadingTriviaLength, trailingTriviaLength);
@@ -99,14 +138,14 @@ public class Head {
 
 
     public SequenceInfo readSequence() {
-        SequenceInfo tokenInfo = null;
+        SequenceInfo sequenceInfo = null;
 
         if (!endOfFile) {
-            tokenInfo = read();
-            if (tokenInfo != null) {
-                System.out.println(tokenInfo);  //TODO: debug mode
+            sequenceInfo = read();
+            if (sequenceInfo != null) {
+                System.out.println(sequenceInfo);  //TODO: debug mode
             }
         }
-        return tokenInfo;
+        return sequenceInfo;
     }
 }
