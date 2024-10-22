@@ -1,6 +1,3 @@
-import syspro.tm.lexer.Token;
-import java.util.ArrayList;
-
 public class Head {
 
     private final String s;
@@ -22,6 +19,10 @@ public class Head {
         return -1;
     }
 
+    public boolean isEndOfFile() {
+        return endOfFile;
+    }
+
     private void readComment(StringBuilder buff) {
         while (getCode() != '\n' && getCode() != -1) {
             int codePoint = getCode();
@@ -37,7 +38,7 @@ public class Head {
         }
 
         // После прочтения комментария продолжаем искать другие тривии
-        if ( getCode() == '#') {
+        if (getCode() == '#') {
             readComment(buff);  // Читаем следующий комментарий
         }
     }
@@ -70,7 +71,7 @@ public class Head {
         return tokenBuffer.toString();
     }
 
-    private TokenInfo read() {
+    private SequenceInfo read() {
         int startTrivial = endToken;
         String initialTrivial = readTrivial();
 
@@ -90,27 +91,22 @@ public class Head {
         String fullValue = initialTrivial + token + trailingTrivial;
 
         if (!initialTrivial.isEmpty()) {
-            return new TokenInfo(fullValue, startTrivial, endToken, leadingTriviaLength, trailingTriviaLength);
+            return new SequenceInfo(fullValue, startTrivial, endToken, leadingTriviaLength, trailingTriviaLength);
         } else {
-            return new TokenInfo(fullValue, startToken, endToken, leadingTriviaLength, trailingTriviaLength);
+            return new SequenceInfo(fullValue, startToken, endToken, leadingTriviaLength, trailingTriviaLength);
         }
     }
 
 
+    public SequenceInfo readSequence() {
+        SequenceInfo tokenInfo = null;
 
-    public ArrayList<TokenInfo> getToken() {
-        ArrayList<TokenInfo> result = new ArrayList<>();
-
-        while (!endOfFile) {
-            TokenInfo tokenInfo = read();  // Читаем токен и тривию
-
+        if (!endOfFile) {
+            tokenInfo = read();
             if (tokenInfo != null) {
-                System.out.println(tokenInfo);  // Печать токена для отладки
-                result.add(tokenInfo);  // Добавляем объект TokenInfo в результат
+                System.out.println(tokenInfo);  //TODO: debug mode
             }
         }
-
-        return result;  // Возвращаем список TokenInfo
+        return tokenInfo;
     }
-
 }

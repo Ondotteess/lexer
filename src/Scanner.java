@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Scanner {
 
-    private ArrayList<String> splitTrivial(TokenInfo tokenInfo) {
+    private ArrayList<String> splitTrivial(SequenceInfo tokenInfo) {
         ArrayList<String> output = new ArrayList<>();
 
         String token = tokenInfo.getToken();
@@ -50,7 +50,7 @@ public class Scanner {
                 //TODO:
             } else if (Character.isDigit(codePoint)) {
                 //TODO:
-            } else if () {
+            } else {
 
             }
 
@@ -58,18 +58,18 @@ public class Scanner {
         }
     }
 
-    public ArrayList<Token> scan(ArrayList<TokenInfo> rawTokens) {
+    public ArrayList<Token> scan(SequenceInfo sequenceInfo) {
 
-        ArrayList<Token> result  = new ArrayList<>();
-        for (TokenInfo rawToken: rawTokens) {
-            for (String s :splitTrivial(rawToken)){
+        ArrayList<Token> output = new ArrayList<>();
+        ArrayList<String> splitedTrivialSequence = splitTrivial(sequenceInfo);
 
-                System.out.println(s);      //TODO: implement parse
-            }
-
+        for (String sequence: splitedTrivialSequence) {
+            Tokenizer tokenizer = new Tokenizer();
+            System.out.println(sequence);
         }
 
-        return result;
+        return output;
+
     }
 
 }

@@ -1,11 +1,11 @@
-public class TokenInfo {
+public class SequenceInfo {
     private final String token;
     private final int leadingTriviaLength;
     private final int trailingTriviaLength;
     private final int start;
     private final int end;
 
-    public TokenInfo(String token, int start, int end, int leadingTriviaLength, int trailingTriviaLength) {
+    public SequenceInfo(String token, int start, int end, int leadingTriviaLength, int trailingTriviaLength) {
         this.token = token;
         this.start = start;
         this.end = end;

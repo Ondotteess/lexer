@@ -1,4 +1,3 @@
-import syspro.tm.Tasks;
 import syspro.tm.lexer.*;
 
 import java.util.*;
@@ -9,15 +8,21 @@ public class Main {
         @Override
         public List<Token> lex(String s) {
 
-            System.out.println(s);
-            ArrayList<TokenInfo> a = new ArrayList<>();
+            //System.out.println(s); //TODO: debug mode
+            ArrayList<SequenceInfo> a = new ArrayList<>();
 
 
             Head head = new Head(s);
             Scanner scanner = new Scanner();
 
-            a = head.getToken();
-            scanner.scan(a);
+            SequenceInfo sequenceInfo = head.readSequence();
+
+            while (sequenceInfo != null) {
+                scanner.scan(sequenceInfo);
+                sequenceInfo = head.readSequence();
+            }
+
+
 
 
             return null;
